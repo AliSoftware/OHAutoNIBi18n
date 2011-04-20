@@ -1,0 +1,15 @@
+//
+// Prefix header for all source files of the 'AutoNibL10n' target in the 'AutoNibL10n' project
+//
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+    #import <UIKit/UIKit.h>
+#endif
+
+
+#define L10N_DEBUG 1
+
+#define _T(x) NSLocalizedString((x),@"")
+#define _Tf(x,...) [NSString stringWithFormat:_T(x),__VA_ARGS__]
+#define _Tf_n(x,n,...) _Tf( (n<=1)?(x):(x"(+)") , n , ##__VA_ARGS__ )

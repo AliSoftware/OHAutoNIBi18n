@@ -1,0 +1,13 @@
+/* 
+   Localizable.strings
+   AutoNibL10n
+
+   Created by Olivier on 17/04/11.
+   Copyright 2011 AliSoftware. All rights reserved.
+ */
+
+
+
+/* Text to say hello */
+"greetings" = "Ce texte a été traduit automagiquement !";
+"buttonTitle" = "Ceci est un bouton";
