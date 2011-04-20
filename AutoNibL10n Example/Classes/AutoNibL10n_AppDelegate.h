@@ -10,7 +10,7 @@
 
 @interface AutoNibL10n_AppDelegate : NSObject <UIApplicationDelegate> {
     UIWindow *window;
-	//IBOutlet UILabel* label;	
+	//IBOutlet UILabel* label;	// NOT NEEDED ANYMORE!
 }
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @end

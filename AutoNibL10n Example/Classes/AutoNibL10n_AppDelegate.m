@@ -16,7 +16,8 @@
 {
     // Override point for customization after application launch.
 
-	//label.text = NSLocalizedString(@"greetings",@"Text to say hello");
+	//label.text = NSLocalizedString(@"greetings",@"Text to say hello"); // NOT NEEDED ANYMORE!
+	
     [self.window makeKeyAndVisible];
     
     return YES;
