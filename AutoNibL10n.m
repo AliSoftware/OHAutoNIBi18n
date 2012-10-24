@@ -47,6 +47,12 @@ static inline void localizeUIViewController(UIViewController* vc);
 	else LocalizeIfClass(UITextField);
 	else LocalizeIfClass(UITextView);
 	else LocalizeIfClass(UIViewController);
+    
+    if (self.isAccessibilityElement == YES)
+    {
+        self.accessibilityLabel = localizedString(self.accessibilityLabel);
+        self.accessibilityHint = localizedString(self.accessibilityHint);
+    }
 	
 	[self localizeNibObject]; // actually calls awakeFromNib as we did some method swizzling
 }
