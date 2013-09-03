@@ -1,14 +1,14 @@
 //
-//  AutoNibL10n.m
-//  FoodReporter
+//  OHAutoNIBi18n.m
 //
 //  Created by Olivier on 03/11/10.
 //  Copyright 2010 FoodReporter. All rights reserved.
 //
 
-#import "AutoNibL10n.h"
 #import <objc/runtime.h> 
+#import <UIKit/UIKit.h>
 
+static inline NSString* localizedString(NSString* aString);
 
 static inline void localizeUIBarButtonItem(UIBarButtonItem* bbi);
 static inline void localizeUIBarItem(UIBarItem* bi);
@@ -21,22 +21,30 @@ static inline void localizeUITextField(UITextField* tf);
 static inline void localizeUITextView(UITextView* tv);
 static inline void localizeUIViewController(UIViewController* vc);
 	
+@interface OHAutoNIBi18nLoader : NSObject
+@end
 
-
-@implementation AutoNibL10n
-+(void)load {
+@implementation OHAutoNIBi18nLoader
++(void)load
+{
+    // Autoload : swizzle -awakeFromNib with -localizeNibObject as soon as the app (and thus this class) is loaded
 	Method localizeNibObject = class_getInstanceMethod([NSObject class], @selector(localizeNibObject));
 	Method awakeFromNib = class_getInstanceMethod([NSObject class], @selector(awakeFromNib));
 	method_exchangeImplementations(awakeFromNib, localizeNibObject);
 }
 @end
 
+/////////////////////////////////////////////////////////////////////////////
 
-@implementation NSObject(Auto_L10n)
+@interface NSObject(OHAutoNIBi18n)
+-(void)localizeNibObject;
+@end
 
+@implementation NSObject(OHAutoNIBi18n)
 
 #define LocalizeIfClass(Cls) if ([self isKindOfClass:[Cls class]]) localize##Cls((Cls*)self)
--(void)localizeNibObject {
+-(void)localizeNibObject
+{
 	LocalizeIfClass(UIBarButtonItem);
 	else LocalizeIfClass(UIBarItem);
 	else LocalizeIfClass(UIButton);
@@ -54,26 +62,32 @@ static inline void localizeUIViewController(UIViewController* vc);
         self.accessibilityHint = localizedString(self.accessibilityHint);
     }
 	
-	[self localizeNibObject]; // actually calls awakeFromNib as we did some method swizzling
+    // Call the original awakeFromNib method
+	[self localizeNibObject]; // this actually calls the original awakeFromNib (and not localizeNibObject) because we did some method swizzling
 }
 @end
 
 /////////////////////////////////////////////////////////////////////////////
 
-static inline NSString* localizedString(NSString* aString) {
+static inline NSString* localizedString(NSString* aString)
+{
 	if (aString == nil || [aString length] == 0)
 		return aString;
+    
+    // Don't translate strings starting with a digit
 	if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[aString characterAtIndex:0]])
 		return aString;
 	
-	//NSString* tr = NSLocalizedString(aString, nil);
-#if L10N_DEBUG
-#warning L10n Debug mode ON
-static NSString* const kNoTranslation = @"$!";
+#if OHAutoNIBi18n_DEBUG
+#warning Debug mode for i18n is active
+    static NSString* const kNoTranslation = @"$!";
 	NSString* tr = [[NSBundle mainBundle] localizedStringForKey:aString value:kNoTranslation table:nil];
-	if ([tr isEqualToString:kNoTranslation]) {
-		if ([aString characterAtIndex:0]=='.') {
-			// strings in XIB starting with '.' are typically used as placeholder for design and will be replaced by translated text via code
+	if ([tr isEqualToString:kNoTranslation])
+    {
+		if ([aString hasPrefix:@"."])
+        {
+			// strings in XIB starting with '.' are typically used as temporary placeholder for design
+            // and will be replaced by code later, so don't warn about them
 			return aString;
 		}
 		NSLog(@"No translation for string '%@'",aString);
@@ -95,7 +109,9 @@ static inline void localizeUIBarButtonItem(UIBarButtonItem* bbi) {
 		[locTitles addObject:localizedString(str)];
 	}
 	bbi.possibleTitles = [NSSet setWithSet:locTitles];
+#if ! __has_feature(objc_arc)
 	[locTitles release];
+#endif
 }
 
 static inline void localizeUIBarItem(UIBarItem* bi) {
@@ -138,7 +154,9 @@ static inline void localizeUISearchBar(UISearchBar* sb) {
 		[locScopesTitles addObject:localizedString(str)];
 	}
 	sb.scopeButtonTitles = [NSArray arrayWithArray:locScopesTitles];
+#if ! __has_feature(objc_arc)
 	[locScopesTitles release];
+#endif
 }
 
 static inline void localizeUISegmentedControl(UISegmentedControl* sc) {

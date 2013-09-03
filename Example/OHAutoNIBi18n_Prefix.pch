@@ -1,0 +1,13 @@
+//
+// Prefix header for all source files of the 'OHAutoNIBi18n' target in the 'OHAutoNIBi18n' project
+//
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+    #import <UIKit/UIKit.h>
+#endif
+
+
+#define OHAutoNIBi18n_DEBUG 1
+
+#import "OHL10nMacros.h"
