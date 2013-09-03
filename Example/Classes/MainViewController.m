@@ -24,7 +24,7 @@
 
 - (IBAction)buttonAction:(id)sender
 {
-    // Here you can use the utility macros _T defined in OHL10nMacros.h
+    // Here you can use the utility macros _T defined in OHL10nMacros.h (imported in the pch of this demo app)
     [[[UIAlertView alloc] initWithTitle:_T(@"alert.title")
                                 message:_Tf(@"alert.message", [UIDevice currentDevice].name)
                                delegate:nil
