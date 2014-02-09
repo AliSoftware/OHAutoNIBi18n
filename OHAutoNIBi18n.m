@@ -5,7 +5,7 @@
 //  Copyright 2010 FoodReporter. All rights reserved.
 //
 
-#import <objc/runtime.h> 
+#import <objc/runtime.h>
 #import <UIKit/UIKit.h>
 
 static inline NSString* localizedString(NSString* aString);
@@ -20,25 +20,14 @@ static inline void localizeUISegmentedControl(UISegmentedControl* sc);
 static inline void localizeUITextField(UITextField* tf);
 static inline void localizeUITextView(UITextView* tv);
 static inline void localizeUIViewController(UIViewController* vc);
-	
-@interface OHAutoNIBi18nLoader : NSObject
-@end
 
-@implementation OHAutoNIBi18nLoader
-+(void)load
-{
-    // Autoload : swizzle -awakeFromNib with -localizeNibObject as soon as the app (and thus this class) is loaded
-	Method localizeNibObject = class_getInstanceMethod([NSObject class], @selector(localizeNibObject));
-	Method awakeFromNib = class_getInstanceMethod([NSObject class], @selector(awakeFromNib));
-	method_exchangeImplementations(awakeFromNib, localizeNibObject);
-}
-@end
 
-/////////////////////////////////////////////////////////////////////////////
+// ------------------------------------------------------------------------------------------------
 
 @interface NSObject(OHAutoNIBi18n)
 -(void)localizeNibObject;
 @end
+
 
 @implementation NSObject(OHAutoNIBi18n)
 
@@ -65,6 +54,15 @@ static inline void localizeUIViewController(UIViewController* vc);
     // Call the original awakeFromNib method
 	[self localizeNibObject]; // this actually calls the original awakeFromNib (and not localizeNibObject) because we did some method swizzling
 }
+
++(void)load
+{
+    // Autoload : swizzle -awakeFromNib with -localizeNibObject as soon as the app (and thus this class) is loaded
+	Method localizeNibObject = class_getInstanceMethod([NSObject class], @selector(localizeNibObject));
+	Method awakeFromNib = class_getInstanceMethod([NSObject class], @selector(awakeFromNib));
+	method_exchangeImplementations(awakeFromNib, localizeNibObject);
+}
+
 @end
 
 /////////////////////////////////////////////////////////////////////////////
@@ -99,7 +97,9 @@ static inline NSString* localizedString(NSString* aString)
 #endif
 }
 
-/////////////////////////////////////////////////////////////////////////////
+
+// ------------------------------------------------------------------------------------------------
+
 
 static inline void localizeUIBarButtonItem(UIBarButtonItem* bbi) {
 	localizeUIBarItem(bbi); /* inheritence */
@@ -178,3 +178,4 @@ static inline void localizeUITextView(UITextView* tv) {
 static inline void localizeUIViewController(UIViewController* vc) {
 	vc.title = localizedString(vc.title);
 }
+
