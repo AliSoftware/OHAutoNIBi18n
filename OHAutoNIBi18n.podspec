@@ -29,7 +29,7 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => "https://github.com/AliSoftware/OHAutoNIBi18n.git", :tag => s.version.to_s }
   
-  s.source_files  = 'OHAutoNIBi18n.m', 'OHL10nMacros.h'
+  s.source_files  = 'OHAutoNIBi18n.{h,m}', 'OHL10nMacros.h'
 
   s.framework  = 'UIKit'
 
@@ -39,6 +39,7 @@ Pod::Spec.new do |s|
   s.prefix_header_contents = <<-EOS
 #define OHAutoNIBi18n_DEBUG 0
 #define OHAutoNIBi18n_AUTOLOAD 1
+#define OHAutoNIBi18n_OBSERVE_LOCALE 1
   EOS
 
 end
