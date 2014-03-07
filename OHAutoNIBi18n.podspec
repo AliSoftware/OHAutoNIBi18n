@@ -39,7 +39,7 @@ Pod::Spec.new do |s|
   s.prefix_header_contents = <<-EOS
 #define OHAutoNIBi18n_DEBUG 0
 #define OHAutoNIBi18n_AUTOLOAD 1
-#define OHAutoNIBi18n_OBSERVE_LOCALE 1
+#define OHAutoNIBi18n_OBSERVE_LOCALE 0
   EOS
 
 end
