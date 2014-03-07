@@ -5,6 +5,7 @@
 //  Copyright 2010 FoodReporter. All rights reserved.
 //
 
+#import "OHAutoNIBi18n.h"
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
 
@@ -23,18 +24,12 @@ static inline void localizeUIViewController(UIViewController* vc);
 
 
 // ------------------------------------------------------------------------------------------------
-
-@interface NSObject(OHAutoNIBi18n)
--(void)localizeNibObject;
-@end
-
-
+#define LocalizeIfClass(Cls) if ([self isKindOfClass:[Cls class]]) localize##Cls((Cls*)self)
 @implementation NSObject(OHAutoNIBi18n)
 
-#define LocalizeIfClass(Cls) if ([self isKindOfClass:[Cls class]]) localize##Cls((Cls*)self)
--(void)localizeNibObject
+-(void)updateLocalization
 {
-	LocalizeIfClass(UIBarButtonItem);
+    LocalizeIfClass(UIBarButtonItem);
 	else LocalizeIfClass(UIBarItem);
 	else LocalizeIfClass(UIButton);
 	else LocalizeIfClass(UILabel);
@@ -50,11 +45,25 @@ static inline void localizeUIViewController(UIViewController* vc);
         self.accessibilityLabel = localizedString(self.accessibilityLabel);
         self.accessibilityHint = localizedString(self.accessibilityHint);
     }
-	
+}
+
+@end
+
+@interface NSObject(OHAutoNIBi18n_Internal)
+-(void)localizeNibObject;
+@end
+
+@implementation NSObject(OHAutoNIBi18n_Internal)
+
+-(void)localizeNibObject
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateLocalization) name:NSCurrentLocaleDidChangeNotification object:nil];
+	[self updateLocalization];
     // Call the original awakeFromNib method
 	[self localizeNibObject]; // this actually calls the original awakeFromNib (and not localizeNibObject) because we did some method swizzling
 }
 
+#if OHAutoNIBi18n_AUTOLOAD
 +(void)load
 {
     // Autoload : swizzle -awakeFromNib with -localizeNibObject as soon as the app (and thus this class) is loaded
@@ -64,6 +73,7 @@ static inline void localizeUIViewController(UIViewController* vc);
 }
 
 @end
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 
