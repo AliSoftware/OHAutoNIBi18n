@@ -8,6 +8,7 @@
 #import "OHAutoNIBi18n.h"
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
+#import <DHCOnDealloc/NSObject+DHCOnDealloc.h>
 
 static inline NSString* localizedString(NSString* aString);
 
@@ -57,13 +58,20 @@ static inline void localizeUIViewController(UIViewController* vc);
 
 -(void)localizeNibObject
 {
+#if OHAutoNIBi18n_OBSERVE_LOCALE
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateLocalization) name:NSCurrentLocaleDidChangeNotification object:nil];
+    [self onDealloc:^{
+        [[NSNotificationCenter defaultCenter]removeObserver:self name:NSCurrentLocaleDidChangeNotification object:nil];
+    }];
+#endif
+
+#if OHAutoNIBi18n_AUTOLOAD
 	[self updateLocalization];
+#endif
     // Call the original awakeFromNib method
 	[self localizeNibObject]; // this actually calls the original awakeFromNib (and not localizeNibObject) because we did some method swizzling
 }
 
-#if OHAutoNIBi18n_AUTOLOAD
 +(void)load
 {
     // Autoload : swizzle -awakeFromNib with -localizeNibObject as soon as the app (and thus this class) is loaded
@@ -73,7 +81,6 @@ static inline void localizeUIViewController(UIViewController* vc);
 }
 
 @end
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
 

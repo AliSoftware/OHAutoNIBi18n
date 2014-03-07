@@ -7,10 +7,6 @@
 
 #import <UIKit/UIKit.h>
 
-#ifndef OHAutoNIBi18nAutoLoadLocalizations
-#define OHAutoNIBi18nAutoLoadLocalizations
-#endif
-
 @interface NSObject(OHAutoNIBi18n)
 -(void)updateLocalization;
 @end
