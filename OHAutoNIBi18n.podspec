@@ -29,7 +29,7 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => "https://github.com/AliSoftware/OHAutoNIBi18n.git", :tag => s.version.to_s }
   
-  s.source_files  = 'OHAutoNIBi18n.m', 'OHL10nMacros.h'
+  s.source_files  = 'OHAutoNIBi18n.{m.h}', 'OHL10nMacros.h'
 
   s.framework  = 'UIKit'
 
