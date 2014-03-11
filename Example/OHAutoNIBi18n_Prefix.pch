@@ -9,5 +9,7 @@
 
 
 #define OHAutoNIBi18n_DEBUG 1
+#define OHAutoNIBi18n_AUTOLOAD 1
+#define OHAutoNIBi18n_OBSERVE_LOCALE 1
 
 #import "OHL10nMacros.h"

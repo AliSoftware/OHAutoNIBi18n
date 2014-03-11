@@ -7,6 +7,8 @@
 
 #import <UIKit/UIKit.h>
 
+extern NSString* const OHAutoNIBi18nCustomBundle;
+
 @interface NSObject(OHAutoNIBi18n)
 -(void)updateLocalization;
 @end

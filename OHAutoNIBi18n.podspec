@@ -24,7 +24,7 @@ Pod::Spec.new do |s|
   s.author       = { "Olivier Halligon" => "olivier.halligon+ae@gmail.com" }
 
 
-  s.platform     = :ios, '4.3'
+  s.platform     = :ios, '6.0'
 
 
   s.source       = { :git => "https://github.com/AliSoftware/OHAutoNIBi18n.git", :tag => s.version.to_s }
@@ -33,7 +33,7 @@ Pod::Spec.new do |s|
 
   s.framework  = 'UIKit'
 
-  s.dependency 'DHCOnDealloc', '~>0.1'
+  s.dependency 'LRNotificationObserver', '~>0.1'
 
   s.requires_arc = true
   s.prefix_header_contents = <<-EOS

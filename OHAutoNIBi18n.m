@@ -8,7 +8,9 @@
 #import "OHAutoNIBi18n.h"
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
-#import <DHCOnDealloc/NSObject+DHCOnDealloc.h>
+#import <LRNotificationObserver+Owner.h>
+
+NSString* const OHAutoNIBi18nCustomBundle = @"OHAutoNIBi18nCustomBundle";
 
 static inline NSString* localizedString(NSString* aString);
 
@@ -22,14 +24,13 @@ static inline void localizeUISegmentedControl(UISegmentedControl* sc);
 static inline void localizeUITextField(UITextField* tf);
 static inline void localizeUITextView(UITextView* tv);
 static inline void localizeUIViewController(UIViewController* vc);
-
+static NSBundle *_customBundle = nil;
 
 // ------------------------------------------------------------------------------------------------
 #define LocalizeIfClass(Cls) if ([self isKindOfClass:[Cls class]]) localize##Cls((Cls*)self)
 @implementation NSObject(OHAutoNIBi18n)
 
--(void)updateLocalization
-{
+-(void)updateLocalization {
     LocalizeIfClass(UIBarButtonItem);
 	else LocalizeIfClass(UIBarItem);
 	else LocalizeIfClass(UIButton);
@@ -59,19 +60,23 @@ static inline void localizeUIViewController(UIViewController* vc);
 -(void)localizeNibObject
 {
 #if OHAutoNIBi18n_OBSERVE_LOCALE
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateLocalization) name:NSCurrentLocaleDidChangeNotification object:nil];
-    [self onDealloc:^{
-        [[NSNotificationCenter defaultCenter]removeObserver:self name:NSCurrentLocaleDidChangeNotification object:nil];
+    [LRNotificationObserver observeName:NSCurrentLocaleDidChangeNotification owner:self block:^(NSNotification *notification) {
+        NSDictionary *userInfo = notification.userInfo;
+        NSBundle *customBundle = userInfo[OHAutoNIBi18nCustomBundle];
+        if (customBundle && [customBundle isKindOfClass:[NSBundle class]] && customBundle != _customBundle) {
+            _customBundle = customBundle;
+            [self updateLocalization];
+            NSLog(@"Locale changed! New bundle: %@", _customBundle);
+        }
     }];
 #endif
 
-#if OHAutoNIBi18n_AUTOLOAD
 	[self updateLocalization];
-#endif
     // Call the original awakeFromNib method
 	[self localizeNibObject]; // this actually calls the original awakeFromNib (and not localizeNibObject) because we did some method swizzling
 }
 
+#if OHAutoNIBi18n_AUTOLOAD
 +(void)load
 {
     // Autoload : swizzle -awakeFromNib with -localizeNibObject as soon as the app (and thus this class) is loaded
@@ -79,6 +84,7 @@ static inline void localizeUIViewController(UIViewController* vc);
 	Method awakeFromNib = class_getInstanceMethod([NSObject class], @selector(awakeFromNib));
 	method_exchangeImplementations(awakeFromNib, localizeNibObject);
 }
+#endif
 
 @end
 
@@ -93,11 +99,13 @@ static inline NSString* localizedString(NSString* aString)
 	if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[aString characterAtIndex:0]])
 		return aString;
 	
+    NSBundle *srcBundle = _customBundle ? _customBundle : [NSBundle mainBundle];
+    
 #if OHAutoNIBi18n_DEBUG
 #warning Debug mode for i18n is active
     static NSString* const kNoTranslation = @"";
-	NSString* tr = NSLocalizedString(aString, kNoTranslation);
-	if ([tr isEqualToString:kNoTranslation] && ![aString isEqualToString:kNoTranslation])
+	NSString* tr = [srcBundle localizedStringForKey:aString value:kNoTranslation table:nil];
+	if ([tr isEqualToString:kNoTranslation])
     {
 		if ([aString hasPrefix:@"."])
         {
@@ -110,7 +118,8 @@ static inline NSString* localizedString(NSString* aString)
 	}
 	return tr;
 #else
-	return NSLocalizedString(aString, kNoTranslation);
+    NSLog(@"string: %@, localization: %@", aString, NSLocalizedString(aString, kNoTranslation));
+    return [srcBundle localizedStringForKey:aString value:nil table:nil];
 #endif
 }
 
