@@ -59,7 +59,7 @@ static NSBundle *_customBundle = nil;
 
 -(void)localizeNibObject
 {
-#if OHAutoNIBi18n_OBSERVE_LOCALE
+#ifdef OHAutoNIBi18n_OBSERVE_LOCALE
     [LRNotificationObserver observeName:NSCurrentLocaleDidChangeNotification owner:self block:^(NSNotification *notification) {
         NSDictionary *userInfo = notification.userInfo;
         NSBundle *customBundle = userInfo[OHAutoNIBi18nCustomBundle];
@@ -76,7 +76,7 @@ static NSBundle *_customBundle = nil;
 	[self localizeNibObject]; // this actually calls the original awakeFromNib (and not localizeNibObject) because we did some method swizzling
 }
 
-#if OHAutoNIBi18n_AUTOLOAD
+#ifndef OHAutoNIBi18n_AUTOLOAD_OFF
 +(void)load
 {
     // Autoload : swizzle -awakeFromNib with -localizeNibObject as soon as the app (and thus this class) is loaded
@@ -101,7 +101,7 @@ static inline NSString* localizedString(NSString* aString)
 	
     NSBundle *srcBundle = _customBundle ? _customBundle : [NSBundle mainBundle];
     
-#if OHAutoNIBi18n_DEBUG
+#ifdef OHAutoNIBi18n_DEBUG
 #warning Debug mode for i18n is active
     static NSString* const kNoTranslation = @"";
 	NSString* tr = [srcBundle localizedStringForKey:aString value:kNoTranslation table:nil];
