@@ -1,7 +1,9 @@
 Pod::Spec.new do |s|
 
   s.name         = "OHAutoNIBi18n"
-  s.version      = "0.1.1"
+
+  s.version      = "0.2"
+
   s.summary      = "Automate the internationalisation (i18n) of your XIB files without a line of code"
 
   s.description  = <<-DESC
@@ -22,19 +24,18 @@ Pod::Spec.new do |s|
   s.author       = { "Olivier Halligon" => "olivier.halligon+ae@gmail.com" }
 
 
-  s.platform     = :ios, '4.3'
+  s.platform     = :ios, '6.0'
 
 
   s.source       = { :git => "https://github.com/AliSoftware/OHAutoNIBi18n.git", :tag => s.version.to_s }
   
-  s.source_files  = 'OHAutoNIBi18n.m', 'OHL10nMacros.h'
+  s.source_files  = 'OHAutoNIBi18n.{h,m}', 'OHL10nMacros.h'
 
   s.framework  = 'UIKit'
 
+  s.dependency 'LRNotificationObserver', '~>0.1'
+
   s.requires_arc = true
-  s.prefix_header_contents = <<-EOS
-#define OHAutoNIBi18n_DEBUG 0
-  EOS
 
 end
 

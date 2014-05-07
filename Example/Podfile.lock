@@ -1,0 +1,10 @@
+PODS:
+  - LRNotificationObserver (0.1)
+
+DEPENDENCIES:
+  - LRNotificationObserver
+
+SPEC CHECKSUMS:
+  LRNotificationObserver: 017f5ee9e826c1705641127999dd66b2e2d1efe0
+
+COCOAPODS: 0.29.0
