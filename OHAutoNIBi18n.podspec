@@ -36,11 +36,6 @@ Pod::Spec.new do |s|
   s.dependency 'LRNotificationObserver', '~>0.1'
 
   s.requires_arc = true
-  s.prefix_header_contents = <<-EOS
-#define OHAutoNIBi18n_DEBUG 0
-#define OHAutoNIBi18n_AUTOLOAD 1
-#define OHAutoNIBi18n_OBSERVE_LOCALE 0
-  EOS
 
 end
 
