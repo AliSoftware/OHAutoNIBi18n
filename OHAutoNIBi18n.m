@@ -26,6 +26,13 @@ static inline void localizeUITextView(UITextView* tv);
 static inline void localizeUIViewController(UIViewController* vc);
 static NSBundle *_customBundle = nil;
 
+void OHAutoNIBi18nSetCustomBundle(NSBundle *customBundle) {
+    if (customBundle && [customBundle isKindOfClass:[NSBundle class]] && customBundle != _customBundle) {
+        _customBundle = customBundle;
+        NSLog(@"Locale changed! New bundle: %@", _customBundle);
+    }
+}
+
 // ------------------------------------------------------------------------------------------------
 #define LocalizeIfClass(Cls) if ([self isKindOfClass:[Cls class]]) localize##Cls((Cls*)self)
 @implementation NSObject(OHAutoNIBi18n)
