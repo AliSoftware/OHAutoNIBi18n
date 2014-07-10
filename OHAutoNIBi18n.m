@@ -9,6 +9,7 @@
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
 #import <LRNotificationObserver+Owner.h>
+#import <NSObject+AssociatedDictionary.h>
 
 NSString* const OHAutoNIBi18nCustomBundle = @"OHAutoNIBi18nCustomBundle";
 
@@ -24,6 +25,7 @@ static inline void localizeUISegmentedControl(UISegmentedControl* sc);
 static inline void localizeUITextField(UITextField* tf);
 static inline void localizeUITextView(UITextView* tv);
 static inline void localizeUIViewController(UIViewController* vc);
+static inline BOOL isLocalizable(NSObject *obj);
 static NSBundle *_customBundle = nil;
 
 void OHAutoNIBi18nSetCustomBundle(NSBundle *customBundle) {
@@ -51,8 +53,12 @@ void OHAutoNIBi18nSetCustomBundle(NSBundle *customBundle) {
     
     if (self.isAccessibilityElement == YES)
     {
-        self.accessibilityLabel = localizedString(self.accessibilityLabel);
-        self.accessibilityHint = localizedString(self.accessibilityHint);
+        if (!self.associatedDictionary[@"accessibilityLabel"]) {
+            self.associatedDictionary[@"accessibilityLabel"] = self.accessibilityLabel ?: @"";
+            self.associatedDictionary[@"accessibilityHint"] = self.accessibilityHint ?: @"";
+        }
+        self.accessibilityLabel = localizedString(self.associatedDictionary[@"accessibilityLabel"]);
+        self.accessibilityHint = localizedString(self.associatedDictionary[@"accessibilityHint"]);
     }
 }
 
@@ -66,19 +72,17 @@ void OHAutoNIBi18nSetCustomBundle(NSBundle *customBundle) {
 
 -(void)localizeNibObject
 {
+    // Only observe or try to localize items if needed.
+    if (isLocalizable(self)) {
 #ifdef OHAutoNIBi18n_OBSERVE_LOCALE
-    [LRNotificationObserver observeName:NSCurrentLocaleDidChangeNotification owner:self block:^(NSNotification *notification) {
-        NSDictionary *userInfo = notification.userInfo;
-        NSBundle *customBundle = userInfo[OHAutoNIBi18nCustomBundle];
-        if (customBundle && [customBundle isKindOfClass:[NSBundle class]] && customBundle != _customBundle) {
-            _customBundle = customBundle;
+        [LRNotificationObserver observeName:NSCurrentLocaleDidChangeNotification owner:self block:^(NSNotification *notification) {
+            NSLog(@"Updating localization for %@ to %@", self, [[_customBundle bundlePath]lastPathComponent]);
             [self updateLocalization];
-            NSLog(@"Locale changed! New bundle: %@", _customBundle);
-        }
-    }];
+        }];
 #endif
 
-	[self updateLocalization];
+        [self updateLocalization];
+    }
     // Call the original awakeFromNib method
 	[self localizeNibObject]; // this actually calls the original awakeFromNib (and not localizeNibObject) because we did some method swizzling
 }
@@ -97,10 +101,10 @@ void OHAutoNIBi18nSetCustomBundle(NSBundle *customBundle) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-static inline NSString* localizedString(NSString* aString)
+static NSString* localizedString(NSString* aString)
 {
-	if (aString == nil || [aString length] == 0)
-		return aString;
+	if ([aString length] == 0)
+		return nil;
     
     // Don't translate strings starting with a digit
 	if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[aString characterAtIndex:0]])
@@ -114,7 +118,7 @@ static inline NSString* localizedString(NSString* aString)
 	NSString* tr = [srcBundle localizedStringForKey:aString value:kNoTranslation table:nil];
 	if ([tr isEqualToString:kNoTranslation])
     {
-		if ([aString hasPrefix:@"."])
+		if ([aString hasPrefix:@"•."])
         {
 			// strings in XIB starting with '.' are typically used as temporary placeholder for design
             // and will be replaced by code later, so don't warn about them
@@ -134,12 +138,19 @@ static inline NSString* localizedString(NSString* aString)
 // ------------------------------------------------------------------------------------------------
 
 
-static inline void localizeUIBarButtonItem(UIBarButtonItem* bbi) {
+static void localizeUIBarButtonItem(UIBarButtonItem* bbi) {
 	localizeUIBarItem(bbi); /* inheritence */
-	
+
 	NSMutableSet* locTitles = [[NSMutableSet alloc] initWithCapacity:[bbi.possibleTitles count]];
+    if (bbi.possibleTitles.count > 0 && !bbi.associatedDictionary[@"possibleTitles[1]"]) {
+        int i = 0;
+        for (NSString *possibleTitle in bbi.possibleTitles) {
+            bbi.associatedDictionary[[NSString stringWithFormat:@"possibleTitles[%i]", i++]] = possibleTitle ?: @"";
+        }
+    }
+    int i = 0;
 	for(NSString* str in bbi.possibleTitles) {
-		[locTitles addObject:localizedString(str)];
+		[locTitles addObject:localizedString(bbi.associatedDictionary[[NSString stringWithFormat:@"possibleTitles[%i]", i++]])];
 	}
 	bbi.possibleTitles = [NSSet setWithSet:locTitles];
 #if ! __has_feature(objc_arc)
@@ -147,18 +158,26 @@ static inline void localizeUIBarButtonItem(UIBarButtonItem* bbi) {
 #endif
 }
 
-static inline void localizeUIBarItem(UIBarItem* bi) {
-	bi.title = localizedString(bi.title);
+static void localizeUIBarItem(UIBarItem* bi) {
+    if (!bi.associatedDictionary[@"title"]) {
+        bi.associatedDictionary[@"title"] = bi.title ?: @"";
+    }
+	bi.title = localizedString(bi.associatedDictionary[@"title"]);
 }
 
-static inline void localizeUIButton(UIButton* btn) {
-	NSString* title[4] = {
-		[btn titleForState:UIControlStateNormal],
-		[btn titleForState:UIControlStateHighlighted],
-		[btn titleForState:UIControlStateDisabled],
-		[btn titleForState:UIControlStateSelected]
-	};
-	
+static void localizeUIButton(UIButton* btn) {
+    NSString *title[4];
+    if (!btn.associatedDictionary[@"titleForState:UIControlStateNormal"]) {
+        btn.associatedDictionary[@"titleForState:UIControlStateNormal"] = [btn titleForState:UIControlStateNormal] ?: @"";
+        btn.associatedDictionary[@"titleForState:UIControlStateHighlighted"] = [btn titleForState:UIControlStateHighlighted] ?: @"";
+        btn.associatedDictionary[@"titleForState:UIControlStateDisabled"] = [btn titleForState:UIControlStateDisabled] ?: @"";
+        btn.associatedDictionary[@"titleForState:UIControlStateSelected"] = [btn titleForState:UIControlStateSelected] ?: @"";
+    }
+    title[0] = btn.associatedDictionary[@"titleForState:UIControlStateNormal"];
+    title[1] = btn.associatedDictionary[@"titleForState:UIControlStateHighlighted"];
+    title[2] = btn.associatedDictionary[@"titleForState:UIControlStateDisabled"];
+    title[3] = btn.associatedDictionary[@"titleForState:UIControlStateSelected"];
+
 	[btn setTitle:localizedString(title[0]) forState:UIControlStateNormal];
 	if (title[1] == [btn titleForState:UIControlStateHighlighted])
 		[btn setTitle:localizedString(title[1]) forState:UIControlStateHighlighted];
@@ -168,23 +187,45 @@ static inline void localizeUIButton(UIButton* btn) {
 		[btn setTitle:localizedString(title[3]) forState:UIControlStateSelected];
 }
 
-static inline void localizeUILabel(UILabel* lbl) {
-	lbl.text = localizedString(lbl.text);
+static void localizeUILabel(UILabel* lbl) {
+    if (!lbl.associatedDictionary[@"text"]) {
+        lbl.associatedDictionary[@"text"] = lbl.text ?: @"";
+    }
+	lbl.text = localizedString(lbl.associatedDictionary[@"text"]);
 }
 
-static inline void localizeUINavigationItem(UINavigationItem* ni) {
-	ni.title = localizedString(ni.title);
-	ni.prompt = localizedString(ni.prompt);
+static void localizeUINavigationItem(UINavigationItem* ni) {
+    
+    if (!ni.associatedDictionary[@"title"]) {
+        ni.associatedDictionary[@"title"] = ni.title ?: @"";
+        ni.associatedDictionary[@"prompt"] = ni.prompt ?: @"";
+    }
+    
+	ni.title = localizedString(ni.associatedDictionary[@"title"]);
+	ni.prompt = localizedString(ni.associatedDictionary[@"prompt"]);
 }
 
-static inline void localizeUISearchBar(UISearchBar* sb) {
+static void localizeUISearchBar(UISearchBar* sb) {
+
+	NSMutableArray* locScopesTitles = [[NSMutableArray alloc] initWithCapacity:[sb.scopeButtonTitles count]];
+    
+    if (!sb.associatedDictionary[@"placeholder"]) {
+        sb.associatedDictionary[@"placeholder"] = sb.placeholder ?: @"";
+        sb.associatedDictionary[@"prompt"] = sb.prompt ?: @"";
+        sb.associatedDictionary[@"text"] = sb.text ?: @"";
+        int i = 0;
+        for (NSString *scopeTitle in sb.scopeButtonTitles) {
+            sb.associatedDictionary[[NSString stringWithFormat:@"scopeButtonTitles[%i]", i++]] = scopeTitle ?: @"";
+        }
+    }
+    
 	sb.placeholder = localizedString(sb.placeholder);
 	sb.prompt = localizedString(sb.prompt);
 	sb.text = localizedString(sb.text);
 	
-	NSMutableArray* locScopesTitles = [[NSMutableArray alloc] initWithCapacity:[sb.scopeButtonTitles count]];
+    int i = 0;
 	for(NSString* str in sb.scopeButtonTitles) {
-		[locScopesTitles addObject:localizedString(str)];
+		[locScopesTitles addObject:localizedString(sb.associatedDictionary[[NSString stringWithFormat:@"scopeButtonTitles[%i]", i++]])];
 	}
 	sb.scopeButtonTitles = [NSArray arrayWithArray:locScopesTitles];
 #if ! __has_feature(objc_arc)
@@ -192,23 +233,55 @@ static inline void localizeUISearchBar(UISearchBar* sb) {
 #endif
 }
 
-static inline void localizeUISegmentedControl(UISegmentedControl* sc) {
+static void localizeUISegmentedControl(UISegmentedControl* sc) {
+
 	NSUInteger n = sc.numberOfSegments;
-	for(NSUInteger idx = 0; idx<n; ++idx) {
-		[sc setTitle:localizedString([sc titleForSegmentAtIndex:idx]) forSegmentAtIndex:idx];
+    
+    if (n > 0 && !sc.associatedDictionary[@"titleForSegmentAtIndex:0"]) {
+        for (int i = 0; i < n; i++) {
+            sc.associatedDictionary[[NSString stringWithFormat:@"titleForSegmentAtIndex:%i", i]] = [sc titleForSegmentAtIndex:i] ?: @"";
+        }
+    }
+    
+	for(int idx = 0; idx<n; ++idx) {
+		[sc setTitle:localizedString(sc.associatedDictionary[[NSString stringWithFormat:@"titleForSegmentAtIndex:%i", idx]]) forSegmentAtIndex:idx];
 	}
 }
 
-static inline void localizeUITextField(UITextField* tf) {
-	tf.text = localizedString(tf.text);
-	tf.placeholder = localizedString(tf.placeholder);
+static void localizeUITextField(UITextField* tf) {
+    if (!tf.associatedDictionary[@"text"]) {
+        tf.associatedDictionary[@"text"] = tf.text ?: @"";
+        tf.associatedDictionary[@"placeholder"] = tf.placeholder ?: @"";
+    }
+	tf.text = localizedString(tf.associatedDictionary[@"text"]);
+	tf.placeholder = localizedString(tf.associatedDictionary[@"placeholder"]);
 }
 
-static inline void localizeUITextView(UITextView* tv) {
-	tv.text = localizedString(tv.text);
+static void localizeUITextView(UITextView* tv) {
+    if (!tv.associatedDictionary[@"text"]) {
+        tv.associatedDictionary[@"text"] = tv.text ?: @"";
+    }
+	tv.text = localizedString(tv.associatedDictionary[@"text"]);
 }
 
-static inline void localizeUIViewController(UIViewController* vc) {
-	vc.title = localizedString(vc.title);
+static void localizeUIViewController(UIViewController* vc) {
+    if (!vc.associatedDictionary[@"title"]) {
+        vc.associatedDictionary[@"title"] = vc.title ?: @"";
+    }
+	vc.title = localizedString(vc.associatedDictionary[@"title"]);
+}
+
+static BOOL isLocalizable(NSObject *obj) {
+    return ([obj isKindOfClass:[UIBarButtonItem class]] ||
+            [obj isKindOfClass:[UIBarItem class]] ||
+            [obj isKindOfClass:[UIButton class]] ||
+            [obj isKindOfClass:[UILabel class]] ||
+            [obj isKindOfClass:[UINavigationItem class]] ||
+            [obj isKindOfClass:[UISearchBar class]] ||
+            [obj isKindOfClass:[UISegmentedControl class]] ||
+            [obj isKindOfClass:[UITextField class]] ||
+            [obj isKindOfClass:[UITextView class]] ||
+            [obj isKindOfClass:[UIViewController class]]
+            );
 }
 

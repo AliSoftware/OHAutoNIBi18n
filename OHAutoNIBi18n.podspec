@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
 
   s.name         = "OHAutoNIBi18n"
 
-  s.version      = "0.2"
+  s.version      = "0.3"
 
   s.summary      = "Automate the internationalisation (i18n) of your XIB files without a line of code"
 
@@ -34,6 +34,7 @@ Pod::Spec.new do |s|
   s.framework  = 'UIKit'
 
   s.dependency 'LRNotificationObserver', '~>0.1'
+  s.dependency 'ObjcAssociatedObjectHelpers', '~> 1.2.0'
 
   s.requires_arc = true
 
