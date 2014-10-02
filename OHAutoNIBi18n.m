@@ -45,8 +45,11 @@ static inline void localizeUIViewController(UIViewController* vc);
 	else LocalizeIfClass(UITextView);
 	else LocalizeIfClass(UIViewController);
     
-    if (self.isAccessibilityElement == YES)
+    if (self.isAccessibilityElement == YES && ![self isKindOfClass:UITableView.class])
     {
+        // Security to avoid translating tableView's accessibilityLabel & accessibilityHint
+        // since it seems to provoke a crash on some configurations
+        // See https://github.com/AliSoftware/OHAutoNIBi18n/issues/3
         self.accessibilityLabel = localizedString(self.accessibilityLabel);
         self.accessibilityHint = localizedString(self.accessibilityHint);
     }
