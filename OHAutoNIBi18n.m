@@ -58,12 +58,14 @@ static inline void localizeUIViewController(UIViewController* vc);
     [self localizeNibObject]; // this actually calls the original awakeFromNib (and not localizeNibObject) because we did some method swizzling
 }
 
-+(void)load
-{
-    // Autoload : swizzle -awakeFromNib with -localizeNibObject as soon as the app (and thus this class) is loaded
-    Method localizeNibObject = class_getInstanceMethod([NSObject class], @selector(localizeNibObject));
-    Method awakeFromNib = class_getInstanceMethod([NSObject class], @selector(awakeFromNib));
-    method_exchangeImplementations(awakeFromNib, localizeNibObject);
++(void)load {
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        // Autoload : swizzle -awakeFromNib with -localizeNibObject as soon as the app (and thus this class) is loaded
+        Method localizeNibObject = class_getInstanceMethod([NSObject class], @selector(localizeNibObject));
+        Method awakeFromNib = class_getInstanceMethod([NSObject class], @selector(awakeFromNib));
+        method_exchangeImplementations(awakeFromNib, localizeNibObject);
+    });
 }
 
 @end
