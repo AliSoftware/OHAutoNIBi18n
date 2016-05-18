@@ -14,6 +14,7 @@
 NSString* const OHAutoNIBi18nCustomBundle = @"OHAutoNIBi18nCustomBundle";
 
 static inline NSString* localizedString(NSString* aString);
+static inline NSAttributedString* localizedAttributedString(NSAttributedString *attribString);
 
 static inline void localizeUIBarButtonItem(UIBarButtonItem* bbi);
 static inline void localizeUIBarItem(UIBarItem* bi);
@@ -188,7 +189,7 @@ static void localizeUIBarItem(UIBarItem* bi) {
 static void localizeUIButton(UIButton* btn) {
     
     if ([btn attributedTitleForState:UIControlStateNormal]) {
-        NSString *attributedTitle[4];
+        NSAttributedString *attributedTitle[4];
         if (!btn.associatedDictionary[@"attributedTitleForState:UIControlStateNormal"]) {
             btn.associatedDictionary[@"attributedTitleForState:UIControlStateNormal"] = [btn attributedTitleForState:UIControlStateNormal] ?: @"";
             btn.associatedDictionary[@"attributedTitleForState:UIControlStateHighlighted"] = [btn attributedTitleForState:UIControlStateHighlighted] ?: @"";
