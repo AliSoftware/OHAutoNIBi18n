@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
   s.platform     = :ios, '6.0'
 
 
-  s.source       = { :git => "https://github.com/AliSoftware/OHAutoNIBi18n.git", :tag => s.version.to_s }
+  s.source       = { :git => "https://github.com/nobre84/OHAutoNIBi18n.git", :tag => s.version.to_s }
   
   s.source_files  = 'OHAutoNIBi18n.{h,m}', 'OHL10nMacros.h'
 
