@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
 
   s.name         = "OHAutoNIBi18n"
 
-  s.version      = "0.3"
+  s.version      = "0.4"
 
   s.summary      = "Automate the internationalisation (i18n) of your XIB files without a line of code"
 

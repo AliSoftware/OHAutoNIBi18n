@@ -8,8 +8,8 @@
 #import "OHAutoNIBi18n.h"
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
-#import <LRNotificationObserver+Owner.h>
-#import <NSObject+AssociatedDictionary.h>
+#import "LRNotificationObserver+Owner.h"
+#import "NSObject+AssociatedDictionary.h"
 
 NSString* const OHAutoNIBi18nCustomBundle = @"OHAutoNIBi18nCustomBundle";
 
@@ -134,6 +134,26 @@ static NSString* localizedString(NSString* aString)
 #endif
 }
 
+static inline NSAttributedString* localizedAttributedString(NSAttributedString *attribString) {
+    NSMutableAttributedString *returnString = [[NSMutableAttributedString alloc]init];
+    
+    NSRange totalRange = NSMakeRange (0, attribString.length);
+    
+    [attribString enumerateAttributesInRange: totalRange options: 0 usingBlock: ^(NSDictionary *attributes, NSRange range, BOOL *stop)
+     {
+         
+         NSString *string = [[attribString string] substringWithRange:range];
+         
+         NSString *trans = localizedString(string);
+         
+         NSAttributedString *translatedString = [[NSAttributedString alloc]initWithString:trans attributes:attributes];
+         
+         [returnString appendAttributedString:translatedString];
+         
+     }];
+    
+    return returnString;
+}
 
 // ------------------------------------------------------------------------------------------------
 
@@ -166,6 +186,29 @@ static void localizeUIBarItem(UIBarItem* bi) {
 }
 
 static void localizeUIButton(UIButton* btn) {
+    
+    if ([btn attributedTitleForState:UIControlStateNormal]) {
+        NSString *attributedTitle[4];
+        if (!btn.associatedDictionary[@"attributedTitleForState:UIControlStateNormal"]) {
+            btn.associatedDictionary[@"attributedTitleForState:UIControlStateNormal"] = [btn attributedTitleForState:UIControlStateNormal] ?: @"";
+            btn.associatedDictionary[@"attributedTitleForState:UIControlStateHighlighted"] = [btn attributedTitleForState:UIControlStateHighlighted] ?: @"";
+            btn.associatedDictionary[@"attributedTitleForState:UIControlStateDisabled"] = [btn attributedTitleForState:UIControlStateDisabled] ?: @"";
+            btn.associatedDictionary[@"attributedTitleForState:UIControlStateSelected"] = [btn attributedTitleForState:UIControlStateSelected] ?: @"";
+        }
+        attributedTitle[0] = btn.associatedDictionary[@"attributedTitleForState:UIControlStateNormal"];
+        attributedTitle[1] = btn.associatedDictionary[@"attributedTitleForState:UIControlStateHighlighted"];
+        attributedTitle[2] = btn.associatedDictionary[@"attributedTitleForState:UIControlStateDisabled"];
+        attributedTitle[3] = btn.associatedDictionary[@"attributedTitleForState:UIControlStateSelected"];
+        [btn setAttributedTitle:localizedAttributedString(attributedTitle[0]) forState:UIControlStateNormal];
+        if (attributedTitle[1] != attributedTitle[0])
+            [btn setAttributedTitle:localizedAttributedString(attributedTitle[1]) forState:UIControlStateHighlighted];
+        if (attributedTitle[2] != attributedTitle[0])
+            [btn setAttributedTitle:localizedAttributedString(attributedTitle[2]) forState:UIControlStateDisabled];
+        if (attributedTitle[3] != attributedTitle[0])
+            [btn setAttributedTitle:localizedAttributedString(attributedTitle[3]) forState:UIControlStateSelected];
+        return;
+    }
+    
     NSString *title[4];
     if (!btn.associatedDictionary[@"titleForState:UIControlStateNormal"]) {
         btn.associatedDictionary[@"titleForState:UIControlStateNormal"] = [btn titleForState:UIControlStateNormal] ?: @"";
@@ -192,6 +235,12 @@ static void localizeUILabel(UILabel* lbl) {
         lbl.associatedDictionary[@"text"] = lbl.text ?: @"";
     }
 	lbl.text = localizedString(lbl.associatedDictionary[@"text"]);
+    if (lbl.attributedText) {
+        if (!lbl.associatedDictionary[@"attributedText"]) {
+            lbl.associatedDictionary[@"attributedText"] = lbl.attributedText;
+        }
+        lbl.attributedText = localizedAttributedString(lbl.associatedDictionary[@"attributedText"]);
+    }
 }
 
 static void localizeUINavigationItem(UINavigationItem* ni) {
