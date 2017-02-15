@@ -45,6 +45,7 @@
 		47A2A8D117D6199A00E6D434 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		47F8308817D605EA00F1F2D7 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		47F8308917D605EA00F1F2D7 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		70BD8B941E54921000EA6CAE /* OHAutoNIBi18n.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = OHAutoNIBi18n.h; path = ../OHAutoNIBi18n.h; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* OHAutoNIBi18n-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "OHAutoNIBi18n-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -87,6 +88,7 @@
 			isa = PBXGroup;
 			children = (
 				47A2A8D017D6165600E6D434 /* OHL10nMacros.h */,
+				70BD8B941E54921000EA6CAE /* OHAutoNIBi18n.h */,
 				0968D7FA135F875C00E937B9 /* OHAutoNIBi18n.m */,
 				080E96DDFE201D6D7F000001 /* Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,

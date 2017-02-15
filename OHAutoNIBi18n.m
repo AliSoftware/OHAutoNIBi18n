@@ -7,6 +7,7 @@
 
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
+#import "OHAutoNIBi18n.h"
 
 static inline NSString* localizedString(NSString* aString);
 
@@ -23,6 +24,16 @@ static inline void localizeUIViewController(UIViewController* vc);
 
 
 // ------------------------------------------------------------------------------------------------
+
+static NSBundle* _bundle = nil;
+static NSString* _tableName = nil;
+
+@implementation OHAutoNIBi18n
++ (void)setLocalizationBundle:(NSBundle* __nullable)bundle table:(NSString* __nullable)table {
+    _bundle = bundle ?: [NSBundle mainBundle];
+    _tableName = table;
+}
+@end
 
 @interface NSObject(OHAutoNIBi18n)
 -(void)localizeNibObject;
@@ -64,6 +75,7 @@ static inline void localizeUIViewController(UIViewController* vc);
     Method localizeNibObject = class_getInstanceMethod([NSObject class], @selector(localizeNibObject));
     Method awakeFromNib = class_getInstanceMethod([NSObject class], @selector(awakeFromNib));
     method_exchangeImplementations(awakeFromNib, localizeNibObject);
+    _bundle = [NSBundle mainBundle];
 }
 
 @end
@@ -82,7 +94,7 @@ static inline NSString* localizedString(NSString* aString)
 #if OHAutoNIBi18n_DEBUG
 #warning Debug mode for i18n is active
     static NSString* const kNoTranslation = @"$!";
-    NSString* tr = [[NSBundle mainBundle] localizedStringForKey:aString value:kNoTranslation table:nil];
+    NSString* tr = [_bundle localizedStringForKey:aString value:kNoTranslation table:_tableName];
     if ([tr isEqualToString:kNoTranslation])
     {
         if ([aString hasPrefix:@"."])
@@ -96,7 +108,7 @@ static inline NSString* localizedString(NSString* aString)
     }
     return tr;
 #else
-    return [[NSBundle mainBundle] localizedStringForKey:aString value:nil table:nil];
+    return [_bundle localizedStringForKey:aString value:nil table:_tableName];
 #endif
 }
 

@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "OHAutoNIBi18n"
-  s.version      = "0.1.3"
+  s.version      = "0.2.0"
   s.summary      = "Automate the internationalisation (i18n) of your XIB files without a line of code"
 
   s.description  = <<-DESC
@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
 
   s.source       = { :git => "https://github.com/AliSoftware/OHAutoNIBi18n.git", :tag => s.version.to_s }
   
-  s.source_files  = 'OHAutoNIBi18n.m', 'OHL10nMacros.h'
+  s.source_files  = 'OHAutoNIBi18n.m', 'OHAutoNIBi18n.h', 'OHL10nMacros.h'
 
   s.framework  = 'UIKit'
 
