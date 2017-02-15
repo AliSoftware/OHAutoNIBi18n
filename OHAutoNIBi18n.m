@@ -29,9 +29,9 @@ static NSBundle* _bundle = nil;
 static NSString* _tableName = nil;
 
 @implementation OHAutoNIBi18n
-+ (void)setLocalizationBundle:(NSBundle* __nullable)bundle table:(NSString* __nullable)table {
++ (void)setLocalizationBundle:(NSBundle* __nullable)bundle tableName:(NSString* __nullable)tableName {
     _bundle = bundle ?: [NSBundle mainBundle];
-    _tableName = table;
+    _tableName = tableName;
 }
 @end
 

@@ -13,7 +13,7 @@ Simply use the keys of your Localizable.strings in the text of any element in yo
 
 # Installation
 
-To use this, simply **add `OHAutoNIBi18n.m` in your project** and… that's all! `OHAutoNIBi18n` will be loaded automatically at runtime and translate your XIB on the fly without any additional line of code.
+To use this, simply **add `OHAutoNIBi18n.h` and `OHAutoNIBi18n.m` in your project** and… that's all! `OHAutoNIBi18n` will be loaded automatically at runtime and translate your XIB on the fly without any additional line of code.
 
 If you also want to use the `_T()`, `_Tf()` and `_Tfn()` macros, you can also add and `#import "OHL10nMacros.h"`.
 
@@ -46,6 +46,26 @@ This can become quite a pain:
 
 For all these reasons, Base Localization is just not such a great solution after all, whereas `OHAutoNIBi18n` does not have those quirks.
 
+### Using it in a framework
+
+If you have a framework containing storyboards and XIBs that needs to be auto-localized using `OHAutoNIBi18n`, you can embed `OHAutoNIBi18n` in your framework, alongside your storyboards, XIBs, and `Localizable.strings` files.
+
+In that special case, because your localized strings won't be located in the main bundle of your app using the framework, but will be in the `Localizable.strings` file inside your framework bundle, you'll have to tell `OHAutoNIBi18n` to use your framework bundle instead of the main bundle. To do that, you'll have to call the following method as early as possible in your framework's lifecycle, especially before any of your framework's storyboard or XIB is loaded:
+
+```objc
+// Objective-C
+NSBundle* fmkBundle = [NSBundle bundleForClass:SomeClassOfYourFmk.class];
+[OHAutoNIBi18n setLocalizationBundle:fmkBundle tableName:nil];
+```
+```swift
+// Swift
+let fmkBundle = Bundle(for:SomeClassOfYourFmk.self)
+OHAutoNIBi18n.setLocalizationBundle(fmkBundle, tableName:nil)
+```
+
+_Using `SomeClassOfYourFmk` as a class belonging to your framework to easily derive your framework bundle from it._
+
+You can also set a different table to look up for localizations when auto-translating XIBs and Storyboards, providing a specific `tableName` here. If set to `nil`, it will use the default name `Localizable` instead.
 
 # License
 
