@@ -72,10 +72,13 @@ static NSString* _tableName = nil;
 +(void)load
 {
     // Autoload : swizzle -awakeFromNib with -localizeNibObject as soon as the app (and thus this class) is loaded
-    Method localizeNibObject = class_getInstanceMethod([NSObject class], @selector(localizeNibObject));
-    Method awakeFromNib = class_getInstanceMethod([NSObject class], @selector(awakeFromNib));
-    method_exchangeImplementations(awakeFromNib, localizeNibObject);
-    _bundle = [NSBundle mainBundle];
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        Method localizeNibObject = class_getInstanceMethod([NSObject class], @selector(localizeNibObject));
+        Method awakeFromNib = class_getInstanceMethod([NSObject class], @selector(awakeFromNib));
+        method_exchangeImplementations(awakeFromNib, localizeNibObject);
+        _bundle = [NSBundle mainBundle];
+    });
 }
 
 @end
