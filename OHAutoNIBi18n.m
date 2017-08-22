@@ -27,6 +27,7 @@ static inline void localizeUIViewController(UIViewController* vc);
 
 static NSBundle* _bundle = nil;
 static NSString* _tableName = nil;
+static BOOL _swizzled = NO;
 
 @implementation OHAutoNIBi18n
 + (void)setLocalizationBundle:(NSBundle* __nullable)bundle tableName:(NSString* __nullable)tableName {
@@ -71,11 +72,15 @@ static NSString* _tableName = nil;
 
 +(void)load
 {
+    if (_swizzled) { return; }
+
     // Autoload : swizzle -awakeFromNib with -localizeNibObject as soon as the app (and thus this class) is loaded
     Method localizeNibObject = class_getInstanceMethod([NSObject class], @selector(localizeNibObject));
     Method awakeFromNib = class_getInstanceMethod([NSObject class], @selector(awakeFromNib));
     method_exchangeImplementations(awakeFromNib, localizeNibObject);
     _bundle = [NSBundle mainBundle];
+    
+    _swizzled = YES;
 }
 
 @end
